@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Your Profile</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="quiz.html">Play Quiz</a>
+            <a href="leaderboard.html">Leaderboard</a>
+            <a href="login.html">Login/Register</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Profile Details</h2>
+        <div id="profileDetails"></div>
+    </main>
+    <script>
+        fetch('/api/user/profile').then(response => response.json()).then(data => {
+            const profileDetails = document.getElementById('profileDetails');
+            profileDetails.innerHTML = `
+                <p>Username: ${data.username}</p>
+                <h3>Achievements:</h3>
+                <ul>${data.achievements.map(a => `<li>${a}</li>`).join('')}</ul>
+                <h3>Quiz History:</h3>
+                <ul>${data.quizHistory.map(q => `<li>Score: ${q.score}, Date: ${q.date}</li>`).join('')}</ul>
+            `;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Register</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Login or Register</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="quiz.html">Play Quiz</a>
+            <a href="profile.html">Profile</a>
+            <a href="leaderboard.html">Leaderboard</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="loginUsername">Username:</label>
+            <input type="text" id="loginUsername" name="username" required>
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" name="password" required>
+            <button type="submit">Login</button>
+        </form>
+        <h2>Register</h2>
+        <form id="registerForm">
+            <label for="registerUsername">Username:</label>
+            <input type="text" id="registerUsername" name="username" required>
+            <label for="registerPassword">Password:</label>
+            <input type="password" id="registerPassword" name="password" required>
+            <button type="submit">Register</button>
+        </form>
+    </main>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = 'profile.html';
+                } else {
+                    alert('Invalid credentials');
+                }
+            });
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = 'profile.html';
+                } else {
+                    alert('Registration failed');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

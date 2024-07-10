@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Quiz</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Music Quiz</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="profile.html">Profile</a>
+            <a href="leaderboard.html">Leaderboard</a>
+            <a href="login.html">Login/Register</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Select Quiz Category</h2>
+        <div id="categories"></div>
+        <div id="quiz-container"></div>
+        <div id="result"></div>
+    </main>
+    <script>
+        fetch('/api/quiz/categories').then(response => response.json()).then(categories => {
+            const categoriesDiv = document.getElementById('categories');
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.innerText = category;
+                button.addEventListener('click', () => startQuiz(category));
+                categoriesDiv.appendChild(button);
+            });
+        });
+
+        function startQuiz(category) {
+            fetch(`/api/quiz/questions?category=${category}`).then(response => response.json()).then(questions => {
+                const quizContainer = document.getElementById('quiz-container');
+                quizContainer.innerHTML = '';
+                let score = 0;
+                let currentQuestionIndex = 0;
+
+                function showQuestion() {
+                    const question = questions[currentQuestionIndex];
+                    const questionDiv = document.createElement('div');
+                    questionDiv.innerHTML = `<p>${question.question}</p>`;
+                    if (question.type === 'multiple-choice') {
+                        question.options.forEach((option, index) => {
+                            const button = document.createElement('button');
+                            button.innerText = option;
+                            button.addEventListener('click', () => {
+                                if (index === question.correct) {
+                                    score++;
+                                }
+                                currentQuestionIndex++;
+                                if (currentQuestionIndex < questions.length) {
+                                    showQuestion();
+                                } else {
+                                    endQuiz();
+                                }
+                            });
+                            questionDiv.appendChild(button);
+                        });
+                    } else if (question.type === 'true-false') {
+                        const trueButton = document.createElement('button');
+                        trueButton.innerText = 'True';
+                        trueButton.addEventListener('click', () => {
+                            if (question.correct === true) {
+                                score++;
+                            }
+                            currentQuestionIndex++;
+                            if (currentQuestionIndex < questions.length) {
+                                showQuestion();
+                            } else {
+                                endQuiz();
+                            }
+                        });
+                        questionDiv.appendChild(trueButton);
+
+                        const falseButton = document.createElement('button');
+                        falseButton.innerText = 'False';
+                        falseButton.addEventListener('click', () => {
+                            if (question.correct === false) {
+                                score++;
+                            }
+                            currentQuestionIndex++;
+                            if (currentQuestionIndex < questions.length) {
+                                showQuestion();
+                            } else {
+                                endQuiz();
+                            }
+                        });
+                        questionDiv.appendChild(falseButton);
+                    }
+                    quizContainer.appendChild(questionDiv);
+                }
+
+                function endQuiz() {
+                    document.getElementById('result').innerText = `Your score: ${score}`;
+                    fetch('/api/quiz/submit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ score })
+                    }).then(response => response.text()).then(data => {
+                        console.log(data);
+                    });
+                }
+
+                showQuestion();
+            });
+        }
+    </script>
+</body>
+</html>
